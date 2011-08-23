@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8">
+    <title>canvas_image</title>
+    <script type="text/javascript">
+      var map = [ [ 4, 4, 4, 4, 4, 4, 4, 4],
+                  [ 4,12,16,16,17, 4, 4, 4],
+                  [ 4,11, 0, 0, 8,16,16,16],
+                  [ 4,11, 0, 0,13, 1, 1, 1],
+                  [ 4,11, 0, 0, 6, 4, 4, 4],
+                  [ 4, 7, 1, 1, 2, 4, 4, 4],
+                  [ 4, 4, 4, 4, 4, 4, 4, 4]];
+      var TILESET_WIDTH = 5,
+          TILE_WIDTH = 63,
+          TILE_HEIGHT = 32;
+      var on_load = function(){
+        var context = document.getElementById('canvas').getContext('2d'),
+            img = new Image();
+        img.onload = function(){
+          draw_scene(context,img);
+        };
+        img.src = 'tiles.png';
+      };
+      var draw_scene = function(context,sprite){
+        var tile_x,
+            tile_y,
+            w = TILE_WIDTH,
+            h = TILE_HEIGHT,
+            canvas_width = context.canvas.width,
+            canvas_height = context.canvas.height;
+        var tile_cache = {};
+        // add background
+        context.drawImage(Background(canvas_width,canvas_height,'#DAE8F2'),0,0);
+        // draw tiles
+        for(var y = 0, yl = map.length; y < yl; y += 1){
+          for(var x = 0, xl = map[y].length; x < xl; x += 1){
+            tile_x = (x - y) * (w / 2) + ((w / 2) * (yl - 1));
+            tile_y = (x + y) * (h / 2);
+            if(tile_cache[map[y][x]] === undefined){
+              tile_cache[map[y][x]] = Tile(sprite,map[y][x],w,h);
+            };
+            context.drawImage(tile_cache[map[y][x]],tile_x,tile_y);
+          };
+        };
+      };
+      var Tile = function(img,index,w,h){
+        var self = TmpCanvas(w,h)
+            y = Math.floor(index / TILESET_WIDTH),
+            x = (index % TILESET_WIDTH);
+        self.context.drawImage(img,(x * w),(y * h),w,h,0,0,w,h);
+        return self.canvas;
+      };
+      var Background = function(w,h,fill){
+        var self = TmpCanvas(w,h);
+        self.context.fillStyle = fill;
+        self.context.fillRect(0,0,w,h);
+        return self.canvas;
+      };
+      var TmpCanvas = function(w,h){
+        var self = {};
+        self.canvas = document.createElement('canvas');
+        self.canvas.width = w;
+        self.canvas.height = h;
+        self.context = self.canvas.getContext('2d');
+        return self;
+      };
+    </script>
+    <style type="text/css">
+      #canvas_frame {
+        width:480px;
+        height:320px;
+        margin:0 auto;
+      }
+    </style>
+  <head>
+  <body onload="on_load()">
+    <div id="canvas_frame">
+      <canvas id="canvas" width="480" height="320"></canvas>
+    </div>
+  </body>
+</html>
